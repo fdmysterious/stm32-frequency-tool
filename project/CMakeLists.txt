@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/func/error.c
 
+	${CMAKE_CURRENT_SOURCE_DIR}/src/stm32f3xx_hal_msp.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
 )
 
@@ -48,14 +49,21 @@ add_custom_target(bin ALL
 	COMMAND  "${CMAKE_OBJCOPY}" -O binary "${PROJECT_NAME}.elf" "${PROJECT_NAME}.bin"
 )
 
+set(CMSIS_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/sys/system_stm32f3xx.c
+	${CMAKE_CURRENT_SOURCE_DIR}/sys/startup_stm32f302xc.s
+)
+
 target_link_libraries( stm32-template
+	HAL::STM32::F3::CORTEX
 	HAL::STM32::F3::RCC
 	HAL::STM32::F3::RCCEx
 	HAL::STM32::F3::GPIO
-	HAL::STM32::F3::CORTEX
 	CMSIS::STM32::F302xC
 	STM32::NoSys
 )
+
+stm32_add_linker_script(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/sys/STM32F302RCTx_FLASH.ld)
 
 stm32_print_size_of_target(stm32-template)
 
@@ -66,6 +74,7 @@ stm32_print_size_of_target(stm32-template)
 install(
 	FILES
 		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.bin
+		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.elf
 	DESTINATION
 		${OUTPUT_PATH}
 )

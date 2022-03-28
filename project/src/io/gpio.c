@@ -41,7 +41,6 @@ void gpio_init(void)
 	GPIO_InitTypeDef init;
 
 	/* GPIO enable port clocks */
-
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 	__HAL_RCC_GPIOC_CLK_ENABLE();
@@ -50,7 +49,6 @@ void gpio_init(void)
 	__HAL_RCC_GPIOF_CLK_ENABLE();
 
 	/* Init LD2 */
-
 	init.Pin   = PIN_LD2.pin;
 	init.Mode  = GPIO_MODE_OUTPUT_PP;
 	init.Pull  = GPIO_NOPULL;

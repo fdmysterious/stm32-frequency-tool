@@ -16,8 +16,10 @@
    │ Main program                           │
    └────────────────────────────────────────┘ */
 
-void main(void)
+int main(void)
 {
+	HAL_Init();
+
 	clock_init();
 	gpio_init();
 
