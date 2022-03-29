@@ -43,6 +43,8 @@ extern struct GPIO_Pin PIN_USART_RX;
 void    gpio_pin_set(struct GPIO_Pin pin, uint8_t value);
 uint8_t gpio_pin_get(struct GPIO_Pin pin);
 
+void gpio_led_toggle(void);
+
 
 /* ┌────────────────────────────────────────┐
    │ Global interface                       │

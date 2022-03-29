@@ -19,6 +19,14 @@
 
 int main(void)
 {
+	char lf = '\n';
+	const char *hello = "Hi!\n";
+
+	struct UART_Msg_Info msg = {
+		.buffer = NULL,
+		.size   = 0
+	};
+
 	uint8_t ld_state = 0;
 	HAL_Init();
 
@@ -26,10 +34,20 @@ int main(void)
 	gpio_init();
 	uart_init();
 
+	uart_start();
 	while(1) {
-		ld_state = 1 - ld_state;
-		gpio_pin_set(PIN_LD2, ld_state);
-		uart_hello();
+		do {
+			msg = uart_msg_pop();
+		} while(msg.buffer == NULL);
+
+		gpio_led_toggle();
+
+		uart_transmit(msg.buffer, msg.size);
+		msg.buffer = NULL;
+
+		while(!uart_transmit_done());
+		//uart_transmit(&lf, 1);
+		//while(!uart_transmit_done());
 	}
 }
 
@@ -63,7 +81,10 @@ void SysTick_Handler(void)
 
 void HardFault_Handler(void)
 {
-	while(1);
+	while(1) {
+		gpio_led_toggle();
+		HAL_Delay(100);
+	}
 }
 
 void MemManage_Handler(void)

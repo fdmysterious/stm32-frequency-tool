@@ -57,3 +57,10 @@ void gpio_init(void)
 	init.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(PIN_LD2.port, &init);
 }
+
+void gpio_led_toggle(void)
+{
+	static uint8_t ld_state = 0;
+	ld_state = 1 - ld_state;
+	gpio_pin_set(PIN_LD2, ld_state);
+}
