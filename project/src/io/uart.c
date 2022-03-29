@@ -202,7 +202,7 @@ void USART2_IRQHandler(void)
 
 			/* Line break */
 			case '\n':
-				uart_data.rx_size   = uart_data.rx_idx+1;
+				uart_data.rx_size   = uart_data.rx_idx;
 				uart_data.rx_idx    = 0;                       // Reset read index
 				uart_data.rx_side   = 1 - uart_data.rx_side;   // Buffer swap
 				uart_data.rx_flag   = 1;                       // A message is available!

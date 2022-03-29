@@ -20,7 +20,6 @@
 int main(void)
 {
 	char lf = '\n';
-	const char *hello = "Hi!\n";
 
 	struct UART_Msg_Info msg = {
 		.buffer = NULL,
@@ -46,8 +45,8 @@ int main(void)
 		msg.buffer = NULL;
 
 		while(!uart_transmit_done());
-		//uart_transmit(&lf, 1);
-		//while(!uart_transmit_done());
+		uart_transmit(&lf, 1);
+		while(!uart_transmit_done());
 	}
 }
 
