@@ -14,7 +14,9 @@
    │ GPIO defines                           │
    └────────────────────────────────────────┘ */
 
-struct GPIO_Pin PIN_LD2 = { .port = GPIOB, .pin = GPIO_PIN_13 };
+struct GPIO_Pin PIN_LD2      = { .port = GPIOB, .pin = GPIO_PIN_13 };
+struct GPIO_Pin PIN_USART_TX = { .port = GPIOA, .pin = GPIO_PIN_2  };
+struct GPIO_Pin PIN_USART_RX = { .port = GPIOA, .pin = GPIO_PIN_3  };
 
 
 /* ┌────────────────────────────────────────┐

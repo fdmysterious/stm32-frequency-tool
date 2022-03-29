@@ -8,8 +8,9 @@
 
 #include "stm32f3xx_hal.h"
 
-#include "io/clock.h"
-#include "io/gpio.h"
+#include <io/clock.h>
+#include <io/gpio.h>
+#include <io/uart.h>
 
 
 /* ┌────────────────────────────────────────┐
@@ -18,16 +19,17 @@
 
 int main(void)
 {
+	uint8_t ld_state = 0;
 	HAL_Init();
 
 	clock_init();
 	gpio_init();
+	uart_init();
 
 	while(1) {
-		gpio_pin_set(PIN_LD2, 1);
-		HAL_Delay(1000);
-		gpio_pin_set(PIN_LD2, 0);
-		HAL_Delay(1000);
+		ld_state = 1 - ld_state;
+		gpio_pin_set(PIN_LD2, ld_state);
+		uart_hello();
 	}
 }
 
