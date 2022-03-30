@@ -54,11 +54,9 @@ int main(void)
 		} while(msg.buffer == NULL);
 
 		gpio_led_toggle();
+		r_len = prpc_process_line(msg.buffer, buffer, 1024);
 
-		memset  (buffer, 0, 1024);
-		prpc_process_line(msg.buffer, buffer, 1024);
-		r_len = strlen(buffer);
-		if(r_len) {
+		if(r_len) { // if a response has been processed, r_len > 0
 			buffer[r_len] = '\n';
 			uart_transmit(buffer, r_len+1); // +1 for LF char
 			msg.buffer = NULL;
