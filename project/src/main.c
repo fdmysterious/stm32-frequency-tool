@@ -8,6 +8,10 @@
 
 #include "stm32f3xx_hal.h"
 
+#include <memory.h>
+
+#include <printf/printf.h>
+
 #include <io/clock.h>
 #include <io/gpio.h>
 #include <io/uart.h>
@@ -19,21 +23,26 @@
 
 int main(void)
 {
-	char lf = '\n';
+	static char buffer[1024] = {0};
 
 	struct UART_Msg_Info msg = {
 		.buffer = NULL,
 		.size   = 0
 	};
 
-	uint8_t ld_state = 0;
+	/* ───────────────── Init ───────────────── */
+	
+
 	HAL_Init();
 
 	clock_init();
 	gpio_init();
 	uart_init();
 
+	/* ─────────────── Main loop ────────────── */
+
 	uart_start();
+	
 	while(1) {
 		do {
 			msg = uart_msg_pop();
@@ -41,11 +50,12 @@ int main(void)
 
 		gpio_led_toggle();
 
-		uart_transmit(msg.buffer, msg.size);
+		memset  (buffer, 0, 1024);
+		snprintf(buffer, 1024, "%.*s\n", msg.size, msg.buffer);
+
+		uart_transmit(buffer, msg.size+1); // +1 for LF char
 		msg.buffer = NULL;
 
-		while(!uart_transmit_done());
-		uart_transmit(&lf, 1);
 		while(!uart_transmit_done());
 	}
 }

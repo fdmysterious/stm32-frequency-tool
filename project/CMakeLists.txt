@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/stm32-cmake/cmake/stm32_gcc.cmake)
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/ext/stm32-cmake/cmake/stm32_gcc.cmake)
 
 project(stm32-template C ASM)
 
@@ -12,6 +12,12 @@ set(OUTPUT_PATH "/output")
 set(HAL_COMP_LIST RCC GPIO CORTEX DMA UART STM32F3)
 set(CMSIS_COMP_LIST "")
 
+## Printf package config
+
+add_definitions(
+	-DPRINTF_ALIAS_STANDARD_FUNCTION_NAMES=1
+)
+
 ####################################
 # Find packages
 ####################################
@@ -23,7 +29,13 @@ find_package(HAL   COMPONENTS "${HAL_COMP_LIST}"   REQUIRED)
 # Generate executable
 ####################################
 
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}/ext/printf/src
+	${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
 set(PROJECT_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/ext/printf/src/printf/printf.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/clock.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/gpio.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/uart.c
@@ -34,9 +46,6 @@ set(PROJECT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
 )
 
-include_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}/src
-)
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/src/stm32f3xx_hal_conf.h)
 add_custom_command(
