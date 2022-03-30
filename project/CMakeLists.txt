@@ -35,15 +35,33 @@ include_directories(
 )
 
 set(PROJECT_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/cmds.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/lex.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/msg.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/parse.c
+
 	${CMAKE_CURRENT_SOURCE_DIR}/ext/printf/src/printf/printf.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/clock.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/gpio.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/uart.c
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/func/error.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/func/cmds.c
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/stm32f3xx_hal_msp.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+)
+
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/lex.c
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/lex.re.c
+	COMMAND re2c -T -o ${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/lex.c ${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/lex.re.c
+)
+
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/func/cmds.c
+	DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/func/cmds.re.c
+	COMMAND re2c -T -o ${CMAKE_CURRENT_SOURCE_DIR}/src/func/cmds.c ${CMAKE_CURRENT_SOURCE_DIR}/src/func/cmds.re.c
 )
 
 

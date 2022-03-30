@@ -1,2 +1,5 @@
 output/
 build/
+
+project/src/prpc/lex.c
+project/src/func/cmds.c

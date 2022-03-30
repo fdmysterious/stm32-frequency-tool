@@ -9,6 +9,7 @@
 #include "stm32f3xx_hal.h"
 
 #include <memory.h>
+#include <string.h>
 
 #include <printf/printf.h>
 
@@ -16,6 +17,7 @@
 #include <io/gpio.h>
 #include <io/uart.h>
 
+#include <func/cmds.h>
 
 /* ┌────────────────────────────────────────┐
    │ Main program                           │
@@ -24,6 +26,7 @@
 int main(void)
 {
 	static char buffer[1024] = {0};
+	size_t r_len = 0;
 
 	struct UART_Msg_Info msg = {
 		.buffer = NULL,
@@ -39,6 +42,8 @@ int main(void)
 	gpio_init();
 	uart_init();
 
+	cmds_init();
+
 	/* ─────────────── Main loop ────────────── */
 
 	uart_start();
@@ -51,12 +56,16 @@ int main(void)
 		gpio_led_toggle();
 
 		memset  (buffer, 0, 1024);
-		snprintf(buffer, 1024, "%.*s\n", msg.size, msg.buffer);
+		prpc_process_line(msg.buffer, buffer, 1024);
+		r_len = strlen(buffer);
+		if(r_len) {
+			buffer[r_len] = '\n';
+			uart_transmit(buffer, r_len+1); // +1 for LF char
+			msg.buffer = NULL;
 
-		uart_transmit(buffer, msg.size+1); // +1 for LF char
-		msg.buffer = NULL;
+			while(!uart_transmit_done());
+		}
 
-		while(!uart_transmit_done());
 	}
 }
 
