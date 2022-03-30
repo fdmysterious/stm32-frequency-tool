@@ -9,7 +9,6 @@
 #include "stm32f3xx_hal.h"
 
 #include <memory.h>
-#include <string.h>
 
 #include <printf/printf.h>
 

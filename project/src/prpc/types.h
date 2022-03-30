@@ -6,10 +6,8 @@
 
 #pragma once
 
-#include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
-
 
 typedef int PRPC_ID_t;
 typedef size_t (*PRPC_Parse_Function_t)(const char **ptr, char *resp_buff, const size_t max_resp_len, const PRPC_ID_t id );
