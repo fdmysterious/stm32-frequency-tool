@@ -7,3 +7,6 @@
 [submodule "project/ext/printf"]
 	path = project/ext/printf
 	url = https://github.com/eyalroz/printf
+[submodule "project/ext/PRPC"]
+	path = project/ext/PRPC
+	url = git@github.com:fdmysterious/PRPC.git
