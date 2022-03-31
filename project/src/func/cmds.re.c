@@ -3,6 +3,8 @@
 #include <prpc/lex.h>
 #include <prpc/msg.h>
 
+#include <io/pwm.h>
+
 PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end );
 PRPC_CMD( has )
 {
@@ -20,6 +22,63 @@ PRPC_CMD( hello )
     return prpc_build_ok( resp_buf, max_resp_len, id );
 }
 
+PRPC_CMD(duty_set)
+{
+	float v;
+	PRPC_Status_t stat = prpc_cmd_parse_args(ptr, id, 1, TOKEN_FLOAT, &v);
+
+	if(stat.status == PRPC_OK) {
+		if((v > 1.f) || (v < 0.f)) {
+			return prpc_build_error(resp_buf, max_resp_len, id, "Value must be between 0.0 and 1.0");
+		}
+
+		else {
+			pwm_duty_set(v);
+			return prpc_build_ok(resp_buf, max_resp_len, id);
+		}
+	}
+	
+	else {
+		return prpc_build_error_status(resp_buf, max_resp_len, id, stat);
+	}
+}
+
+enum PWM_Polarity __parse_pwm_polarity(const char *start, const char *end)
+{
+	/* Character that is above one char → cannot be valid*/
+	if((start+1) != end) return PWM_POLARITY_UNKNOWN;
+	switch(*start) {
+		case '+': return PWM_POSITIVE;
+		case '-': return PWM_NEGATIVE;
+		default:  return PWM_POLARITY_UNKNOWN;
+	}
+}
+
+PRPC_CMD(polarity_set)
+{
+	enum PWM_Polarity   pol;
+	char *id_start, *id_end;
+	PRPC_Status_t      stat = prpc_cmd_parse_args(ptr, id, 1, TOKEN_STRING, &id_start, &id_end);
+
+	/* Parse arguments */
+	if(stat.status == PRPC_OK) {
+		pol = __parse_pwm_polarity(id_start, id_end);
+		if(pol == PWM_POLARITY_UNKNOWN) {
+			return prpc_build_error(resp_buf, max_resp_len, id, "Invalid polarity, can be '+' or '-'");
+		}
+
+		else {
+			pwm_polarity_set(pol);
+			return prpc_build_ok(resp_buf, max_resp_len, id);
+		}
+
+	}
+
+	else {
+		return prpc_build_error_status(resp_buf, max_resp_len, id, stat);
+	}
+}
+
 PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 {
     const char *YYMARKER;
@@ -32,10 +91,13 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 
         end = [ \t\r\n] | '\x00';
 
-        *                   { return NULL;               }
-		'has'           end { return prpc_cmd_has;       }
-        'hello'         end { return prpc_cmd_hello;     }
-		'sub/test'      end { return prpc_cmd_hello;     }
+        *                      { return NULL;                 }
+		'has'              end { return prpc_cmd_has;         }
+        'hello'            end { return prpc_cmd_hello;       }
+		'sub/test'         end { return prpc_cmd_hello;       }
+
+		'pwm/duty/set'     end { return prpc_cmd_duty_set;    }
+		'pwm/polarity/set' end { return prpc_cmd_polarity_set;}
      */
 }
 

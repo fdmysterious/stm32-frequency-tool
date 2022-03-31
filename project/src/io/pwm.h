@@ -8,8 +8,25 @@
 
 #pragma once
 
-void pwm_init    (void);
-void pwm_start   (void);
+/* ┌────────────────────────────────────────┐
+   │ Custom datatypes                       │
+   └────────────────────────────────────────┘ */
 
-void pwm_freq_set(float f);
-void pwm_duty_set(float f);
+enum PWM_Polarity {
+	PWM_POLARITY_UNKNOWN,
+	PWM_POSITIVE,
+	PWM_NEGATIVE
+};
+
+
+/* ┌────────────────────────────────────────┐
+   │ Public interface                       │
+   └────────────────────────────────────────┘ */
+
+void pwm_init        (void);
+
+void pwm_start       (void);
+void pwm_stop        (void);
+
+void pwm_duty_set    (float f);
+void pwm_polarity_set(enum PWM_Polarity pol);

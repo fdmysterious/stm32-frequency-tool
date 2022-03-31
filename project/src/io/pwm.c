@@ -19,16 +19,44 @@
 struct PWM_Data {
 	TIM_HandleTypeDef htim;
 
-	float freq;
-	float duty;
+	uint8_t           started;
+
+	enum PWM_Polarity polarity;
+
+	float             freq;
+	float             duty;
 };
 
+#define PWM_PERIOD_COUNTER 16000
 
 /* ┌────────────────────────────────────────┐
    │ Static data                            │
    └────────────────────────────────────────┘ */
 
 static struct PWM_Data pwm_data;
+
+/* ┌────────────────────────────────────────┐
+   │ Private interface                      │
+   └────────────────────────────────────────┘ */
+
+static void pwm_update_oc_config(void)
+{
+	TIM_OC_InitTypeDef sConfigOC = {0};
+	uint16_t                      duty;
+
+	/* Compute duty cycle */
+	duty = (uint16_t)((float)(PWM_PERIOD_COUNTER)*pwm_data.duty);
+
+	/* Update config */
+	sConfigOC.OCMode                     = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse                      = duty;
+	sConfigOC.OCPolarity                 = (pwm_data.polarity == PWM_POSITIVE) ? TIM_OCPOLARITY_HIGH : TIM_OCPOLARITY_LOW;
+	sConfigOC.OCFastMode                 = TIM_OCFAST_DISABLE;
+
+	pwm_stop();
+	if(HAL_TIM_PWM_ConfigChannel(&pwm_data.htim, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) error_handler();
+	pwm_start();
+}
 
 
 /* ┌────────────────────────────────────────┐
@@ -61,7 +89,7 @@ void pwm_init(void)
 	pwm_data.htim.Instance               = TIM4;
 	pwm_data.htim.Init.Prescaler         = 0;
 	pwm_data.htim.Init.CounterMode       = TIM_COUNTERMODE_UP;
-	pwm_data.htim.Init.Period            = 16000;
+	pwm_data.htim.Init.Period            = PWM_PERIOD_COUNTER;
 	pwm_data.htim.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
 	pwm_data.htim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if(HAL_TIM_Base_Init(&pwm_data.htim) != HAL_OK) error_handler();
@@ -78,16 +106,36 @@ void pwm_init(void)
 	sMasterConfig.MasterSlaveMode        = TIM_MASTERSLAVEMODE_DISABLE;
 	if(HAL_TIMEx_MasterConfigSynchronization(&pwm_data.htim, &sMasterConfig) != HAL_OK) error_handler();
 
-	/* Output channel config */
-	sConfigOC.OCMode                     = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse                      = 8000;
-	sConfigOC.OCPolarity                 = TIM_OCPOLARITY_HIGH;
-	sConfigOC.OCFastMode                 = TIM_OCFAST_DISABLE;
-	if(HAL_TIM_PWM_ConfigChannel(&pwm_data.htim, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) error_handler();
+	/* Initial config */
+	pwm_data.started  = 0;
+	pwm_data.polarity = PWM_POSITIVE;
+	pwm_data.freq     = 2e3f;
+	pwm_data.duty     = 0.5f;
+
+	pwm_update_oc_config();
 }
 
 void pwm_start(void)
 {
 	/* Start TIM4 clock */
 	HAL_TIM_PWM_Start(&pwm_data.htim, TIM_CHANNEL_1);
+}
+
+void pwm_stop(void)
+{
+	HAL_TIM_PWM_Stop(&pwm_data.htim, TIM_CHANNEL_1);
+}
+
+void pwm_duty_set(float f)
+{
+	if( (f>1.f) || (f < 0.f)) return;
+
+	pwm_data.duty = f;
+	pwm_update_oc_config();
+}
+
+void pwm_polarity_set(enum PWM_Polarity pol)
+{
+	pwm_data.polarity = pol;
+	pwm_update_oc_config();
 }
