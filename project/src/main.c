@@ -15,6 +15,7 @@
 #include <io/clock.h>
 #include <io/gpio.h>
 #include <io/uart.h>
+#include <io/pwm.h>
 
 #include <func/cmds.h>
 
@@ -40,12 +41,14 @@ int main(void)
 	clock_init();
 	gpio_init();
 	uart_init();
+	pwm_init();
 
 	cmds_init();
 
 	/* ─────────────── Main loop ────────────── */
 
 	uart_start();
+	pwm_start();
 	
 	while(1) {
 		do {
@@ -53,7 +56,7 @@ int main(void)
 		} while(msg.buffer == NULL);
 
 		gpio_led_toggle();
-		r_len = prpc_process_line(msg.buffer, buffer, 1024);
+		r_len = prpc_process_line(msg.buffer, buffer, 1023); // Keep at least one char for LF
 
 		if(r_len) { // if a response has been processed, r_len > 0
 			buffer[r_len] = '\n';

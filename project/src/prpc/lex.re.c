@@ -44,7 +44,7 @@ void token_next( const char **ptr, Token_t *dst )
         eol        = "[\r\n]+";
         wh         = [ \t]*;
 
-        identifier = [a-zA-Z0-9\-_\.]+;
+        identifier = [a-zA-Z0-9\-_\./]+;
         bool_true  = 'yes';
         bool_false = 'no';
 

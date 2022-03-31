@@ -32,8 +32,10 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 
         end = [ \t\r\n] | '\x00';
 
-        *               { return NULL;               }
-        'hello'     end { return prpc_cmd_hello;     }
+        *                   { return NULL;               }
+		'has'           end { return prpc_cmd_has;       }
+        'hello'         end { return prpc_cmd_hello;     }
+		'sub/test'      end { return prpc_cmd_hello;     }
      */
 }
 

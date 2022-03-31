@@ -9,6 +9,8 @@
 #include "clock.h"
 #include "stm32f3xx_hal.h"
 
+#include <func/error.h>
+
 void clock_init(void)
 {
 

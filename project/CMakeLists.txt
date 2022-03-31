@@ -9,7 +9,7 @@ project(stm32-template C ASM)
 
 set(OUTPUT_PATH "/output")
 
-set(HAL_COMP_LIST RCC GPIO CORTEX DMA UART STM32F3)
+set(HAL_COMP_LIST RCC GPIO CORTEX DMA UART TIM STM32F3)
 set(CMSIS_COMP_LIST "")
 
 ## Printf package config
@@ -44,6 +44,7 @@ set(PROJECT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/clock.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/gpio.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/uart.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/io/pwm.c
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/func/error.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/func/cmds.c
@@ -89,6 +90,8 @@ target_link_libraries( stm32-template
 	HAL::STM32::F3::RCCEx
 	HAL::STM32::F3::GPIO
 	HAL::STM32::F3::UART
+	HAL::STM32::F3::TIM
+	HAL::STM32::F3::TIMEx
 	CMSIS::STM32::F302xC
 	STM32::NoSys
 )

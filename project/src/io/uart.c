@@ -184,8 +184,6 @@ uint8_t uart_transmit_done(void)
 void USART2_IRQHandler(void)
 {
 	uint32_t isrflags   = READ_REG(huart2.Instance->ISR);
-	uint32_t cr1its     = READ_REG(huart2.Instance->CR1);
-
 	char     rd;
 
 

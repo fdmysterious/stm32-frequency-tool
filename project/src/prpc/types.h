@@ -72,4 +72,12 @@ typedef struct {
     };
 } PRPC_Status_t;
 
+/* ┌────────────────────────────────────────┐
+   │ Macros for PRPC responses              │
+   └────────────────────────────────────────┘ */
+
 #define PRPC_CMD( name ) size_t prpc_cmd_ ## name( const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id )
+
+#define PRPC_CMD_OK()  prpc_build_ok(resp_buf, max_resp_len, id)
+#define PRPC_CMD_ERR(txt) prpc_build_error(resp_buf, max_resp_len, id, txt)
+

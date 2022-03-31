@@ -18,6 +18,8 @@ struct GPIO_Pin PIN_LD2      = { .port = GPIOB, .pin = GPIO_PIN_13 };
 struct GPIO_Pin PIN_USART_TX = { .port = GPIOA, .pin = GPIO_PIN_2  };
 struct GPIO_Pin PIN_USART_RX = { .port = GPIOA, .pin = GPIO_PIN_3  };
 
+struct GPIO_Pin PIN_PWM_OUT  = { .port = GPIOB, .pin = GPIO_PIN_6  };
+
 
 /* ┌────────────────────────────────────────┐
    │ Pin control interface                  │
