@@ -23,10 +23,11 @@ enum PWM_Polarity {
    │ Public interface                       │
    └────────────────────────────────────────┘ */
 
-void pwm_init        (void);
+void    pwm_init        (void);
 
-void pwm_start       (void);
-void pwm_stop        (void);
+uint8_t pwm_started_get (void);
+void    pwm_start       (void);
+void    pwm_stop        (void);
 
-void pwm_duty_set    (float f);
-void pwm_polarity_set(enum PWM_Polarity pol);
+void    pwm_duty_set    (float f);
+void    pwm_polarity_set(enum PWM_Polarity pol);

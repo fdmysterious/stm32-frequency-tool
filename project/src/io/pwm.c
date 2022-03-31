@@ -53,9 +53,9 @@ static void pwm_update_oc_config(void)
 	sConfigOC.OCPolarity                 = (pwm_data.polarity == PWM_POSITIVE) ? TIM_OCPOLARITY_HIGH : TIM_OCPOLARITY_LOW;
 	sConfigOC.OCFastMode                 = TIM_OCFAST_DISABLE;
 
-	pwm_stop();
+	HAL_TIM_PWM_Stop(&pwm_data.htim, TIM_CHANNEL_1);
 	if(HAL_TIM_PWM_ConfigChannel(&pwm_data.htim, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) error_handler();
-	pwm_start();
+	if(pwm_data.started) HAL_TIM_PWM_Start(&pwm_data.htim, TIM_CHANNEL_1);
 }
 
 
@@ -115,14 +115,20 @@ void pwm_init(void)
 	pwm_update_oc_config();
 }
 
+uint8_t pwm_started_get(void)
+{
+	return pwm_data.started;
+}
+
 void pwm_start(void)
 {
-	/* Start TIM4 clock */
+	pwm_data.started = 1;
 	HAL_TIM_PWM_Start(&pwm_data.htim, TIM_CHANNEL_1);
 }
 
 void pwm_stop(void)
 {
+	pwm_data.started = 0;
 	HAL_TIM_PWM_Stop(&pwm_data.htim, TIM_CHANNEL_1);
 }
 

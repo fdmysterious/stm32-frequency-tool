@@ -5,6 +5,10 @@
 
 #include <io/pwm.h>
 
+/* ┌────────────────────────────────────────┐
+   │ Generic commands                       │
+   └────────────────────────────────────────┘ */
+
 PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end );
 PRPC_CMD( has )
 {
@@ -21,6 +25,36 @@ PRPC_CMD( hello )
 {
     return prpc_build_ok( resp_buf, max_resp_len, id );
 }
+
+/* ┌────────────────────────────────────────┐
+   │ PWM control                            │
+   └────────────────────────────────────────┘ */
+
+/* ────────────── start/stop ────────────── */
+
+PRPC_CMD(start_set)
+{
+	uint8_t value;
+	PRPC_Status_t stat = prpc_cmd_parse_args(ptr,id,1,TOKEN_BOOLEAN,&value);
+
+	if(stat.status == PRPC_OK) {
+		if(value) pwm_start();
+		else      pwm_stop ();
+
+		return prpc_build_ok(resp_buf, max_resp_len, id);
+	}
+
+	else {
+		return prpc_build_error_status(resp_buf, max_resp_len, id, stat);
+	}
+}
+
+PRPC_CMD(start_get)
+{
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_BOOLEAN, pwm_started_get());
+}
+
+/* ───────────────── duty ───────────────── */
 
 PRPC_CMD(duty_set)
 {
@@ -42,6 +76,8 @@ PRPC_CMD(duty_set)
 		return prpc_build_error_status(resp_buf, max_resp_len, id, stat);
 	}
 }
+
+/* ─────────────── polarity ─────────────── */
 
 enum PWM_Polarity __parse_pwm_polarity(const char *start, const char *end)
 {
@@ -79,6 +115,11 @@ PRPC_CMD(polarity_set)
 	}
 }
 
+
+/* ┌────────────────────────────────────────┐
+   │ Function name parser                   │
+   └────────────────────────────────────────┘ */
+
 PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 {
     const char *YYMARKER;
@@ -94,12 +135,18 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
         *                      { return NULL;                 }
 		'has'              end { return prpc_cmd_has;         }
         'hello'            end { return prpc_cmd_hello;       }
-		'sub/test'         end { return prpc_cmd_hello;       }
 
+		'pwm/started/set'  end { return prpc_cmd_start_set;   }
+		'pwm/started/get'  end { return prpc_cmd_start_get;   }
 		'pwm/duty/set'     end { return prpc_cmd_duty_set;    }
 		'pwm/polarity/set' end { return prpc_cmd_polarity_set;}
      */
 }
+
+
+/* ┌────────────────────────────────────────┐
+   │ Process command                        │
+   └────────────────────────────────────────┘ */
 
 size_t process_cmd( char *resp, const size_t max_len, const PRPC_ID_t id, const char *name_start, const char *name_end, const char **ptr )
 {
@@ -112,6 +159,11 @@ size_t process_cmd( char *resp, const size_t max_len, const PRPC_ID_t id, const 
         return prpc_build_error( resp, max_len, id, "Uknown method" );
     }
 }
+
+
+/* ┌────────────────────────────────────────┐
+   │ Init                                   │
+   └────────────────────────────────────────┘ */
 
 void cmds_init()
 {

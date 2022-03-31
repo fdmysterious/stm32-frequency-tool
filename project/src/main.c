@@ -48,7 +48,6 @@ int main(void)
 	/* ─────────────── Main loop ────────────── */
 
 	uart_start();
-	pwm_start();
 	
 	while(1) {
 		do {
