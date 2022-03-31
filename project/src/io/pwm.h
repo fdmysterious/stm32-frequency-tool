@@ -29,5 +29,6 @@ uint8_t pwm_started_get (void);
 void    pwm_start       (void);
 void    pwm_stop        (void);
 
+void    pwm_freq_set    (float f);
 void    pwm_duty_set    (float f);
 void    pwm_polarity_set(enum PWM_Polarity pol);

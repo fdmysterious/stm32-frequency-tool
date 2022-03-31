@@ -54,6 +54,27 @@ PRPC_CMD(start_get)
 	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_BOOLEAN, pwm_started_get());
 }
 
+/* ─────────────── frequency ────────────── */
+
+PRPC_CMD( freq_set )
+{
+	float v;
+	PRPC_Status_t stat = prpc_cmd_parse_args(ptr, id, 1, TOKEN_FLOAT, &v);
+
+	if(stat.status == PRPC_OK) {
+		if((v < 0.f)) return prpc_build_error(resp_buf, max_resp_len, id, "Value must be >= 0.0");
+		else {
+			pwm_freq_set(v);
+			return prpc_build_ok(resp_buf, max_resp_len, id);
+		}
+	}
+
+	else {
+		return prpc_build_error_status(resp_buf, max_resp_len, id, stat);
+	}
+}
+
+
 /* ───────────────── duty ───────────────── */
 
 PRPC_CMD(duty_set)
@@ -138,6 +159,7 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 
 		'pwm/started/set'  end { return prpc_cmd_start_set;   }
 		'pwm/started/get'  end { return prpc_cmd_start_get;   }
+		'pwm/freq/set'     end { return prpc_cmd_freq_set;    }
 		'pwm/duty/set'     end { return prpc_cmd_duty_set;    }
 		'pwm/polarity/set' end { return prpc_cmd_polarity_set;}
      */
