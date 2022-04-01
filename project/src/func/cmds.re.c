@@ -38,8 +38,8 @@ PRPC_CMD(start_set)
 	PRPC_Status_t stat = prpc_cmd_parse_args(ptr,id,1,TOKEN_BOOLEAN,&value);
 
 	if(stat.status == PRPC_OK) {
-		if(value) pwm_start();
-		else      pwm_stop ();
+		if(value) pwm_start(&pwm_ch1);
+		else      pwm_stop (&pwm_ch1);
 
 		return prpc_build_ok(resp_buf, max_resp_len, id);
 	}
@@ -51,7 +51,7 @@ PRPC_CMD(start_set)
 
 PRPC_CMD(start_get)
 {
-	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_BOOLEAN, pwm_started_get());
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_BOOLEAN, pwm_started_get(&pwm_ch1));
 }
 
 /* ─────────────── frequency ────────────── */
@@ -64,7 +64,7 @@ PRPC_CMD( freq_set )
 	if(stat.status == PRPC_OK) {
 		if((v < 0.f)) return prpc_build_error(resp_buf, max_resp_len, id, "Value must be >= 0.0");
 		else {
-			pwm_freq_set(v);
+			pwm_freq_set(&pwm_ch1, v);
 			return prpc_build_ok(resp_buf, max_resp_len, id);
 		}
 	}
@@ -88,7 +88,7 @@ PRPC_CMD(duty_set)
 		}
 
 		else {
-			pwm_duty_set(v);
+			pwm_duty_set(&pwm_ch1, v);
 			return prpc_build_ok(resp_buf, max_resp_len, id);
 		}
 	}
@@ -125,7 +125,7 @@ PRPC_CMD(polarity_set)
 		}
 
 		else {
-			pwm_polarity_set(pol);
+			pwm_polarity_set(&pwm_ch1, pol);
 			return prpc_build_ok(resp_buf, max_resp_len, id);
 		}
 
@@ -153,15 +153,15 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 
         end = [ \t\r\n] | '\x00';
 
-        *                      { return NULL;                 }
-		'has'              end { return prpc_cmd_has;         }
-        'hello'            end { return prpc_cmd_hello;       }
+        *                       { return NULL;                 }
+		'has'               end { return prpc_cmd_has;         }
+        'hello'             end { return prpc_cmd_hello;       }
 
-		'pwm/started/set'  end { return prpc_cmd_start_set;   }
-		'pwm/started/get'  end { return prpc_cmd_start_get;   }
-		'pwm/freq/set'     end { return prpc_cmd_freq_set;    }
-		'pwm/duty/set'     end { return prpc_cmd_duty_set;    }
-		'pwm/polarity/set' end { return prpc_cmd_polarity_set;}
+		'pwm1/started/set'  end { return prpc_cmd_start_set;   }
+		'pwm1/started/get'  end { return prpc_cmd_start_get;   }
+		'pwm1/freq/set'     end { return prpc_cmd_freq_set;    }
+		'pwm1/duty/set'     end { return prpc_cmd_duty_set;    }
+		'pwm1/polarity/set' end { return prpc_cmd_polarity_set;}
      */
 }
 

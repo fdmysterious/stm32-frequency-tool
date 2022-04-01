@@ -41,7 +41,7 @@ int main(void)
 	clock_init();
 	gpio_init();
 	uart_init();
-	pwm_init();
+	pwm_init(&pwm_ch1);
 
 	cmds_init();
 
