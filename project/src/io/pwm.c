@@ -26,7 +26,7 @@
 struct PWM_Data pwm_ch1 = {
 	.tim        = TIM4,
 	.channel    = TIM_CHANNEL_1,
-	.pin_output = &PIN_PWM_OUT,
+	.pin_output = &PIN_PWM1_OUT,
 	.pin_af     = GPIO_AF2_TIM4
 };
 

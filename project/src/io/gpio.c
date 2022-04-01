@@ -14,11 +14,11 @@
    │ GPIO defines                           │
    └────────────────────────────────────────┘ */
 
-const struct GPIO_Pin PIN_LD2      = { .port = GPIOB, .pin = GPIO_PIN_13 };
-const struct GPIO_Pin PIN_USART_TX = { .port = GPIOA, .pin = GPIO_PIN_2  };
-const struct GPIO_Pin PIN_USART_RX = { .port = GPIOA, .pin = GPIO_PIN_3  };
+const struct GPIO_Pin PIN_LD2       = { .port = GPIOB, .pin = GPIO_PIN_13 };
+const struct GPIO_Pin PIN_USART_TX  = { .port = GPIOA, .pin = GPIO_PIN_2  };
+const struct GPIO_Pin PIN_USART_RX  = { .port = GPIOA, .pin = GPIO_PIN_3  };
 
-const struct GPIO_Pin PIN_PWM_OUT  = { .port = GPIOB, .pin = GPIO_PIN_6  };
+const struct GPIO_Pin PIN_PWM1_OUT  = { .port = GPIOB, .pin = GPIO_PIN_6  };
 
 
 /* ┌────────────────────────────────────────┐

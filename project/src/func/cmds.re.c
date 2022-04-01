@@ -10,7 +10,7 @@
    └────────────────────────────────────────┘ */
 
 PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end );
-PRPC_CMD( has )
+size_t prpc_cmd_has(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
     const char *name_begin, *name_end;
     PRPC_Status_t stat = prpc_cmd_parse_args( ptr, id, 1, TOKEN_IDENTIFIER, &name_begin, &name_end );
@@ -21,10 +21,11 @@ PRPC_CMD( has )
     else return prpc_build_error_status( resp_buf, max_resp_len, id, stat );
 }
 
-PRPC_CMD( hello )
+size_t prpc_cmd_hello(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
     return prpc_build_ok( resp_buf, max_resp_len, id );
 }
+
 
 /* ┌────────────────────────────────────────┐
    │ PWM control                            │
@@ -32,7 +33,7 @@ PRPC_CMD( hello )
 
 /* ────────────── start/stop ────────────── */
 
-PRPC_CMD(start_set)
+size_t prpc_cmd_start_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	uint8_t value;
 	PRPC_Status_t stat = prpc_cmd_parse_args(ptr,id,1,TOKEN_BOOLEAN,&value);
@@ -49,14 +50,14 @@ PRPC_CMD(start_set)
 	}
 }
 
-PRPC_CMD(start_get)
+size_t prpc_cmd_start_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_BOOLEAN, pwm_started_get(&pwm_ch1));
 }
 
 /* ─────────────── frequency ────────────── */
 
-PRPC_CMD( freq_set )
+size_t prpc_cmd_freq_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	float v;
 	PRPC_Status_t stat = prpc_cmd_parse_args(ptr, id, 1, TOKEN_FLOAT, &v);
@@ -77,7 +78,7 @@ PRPC_CMD( freq_set )
 
 /* ───────────────── duty ───────────────── */
 
-PRPC_CMD(duty_set)
+size_t prpc_cmd_duty_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	float v;
 	PRPC_Status_t stat = prpc_cmd_parse_args(ptr, id, 1, TOKEN_FLOAT, &v);
@@ -111,7 +112,7 @@ enum PWM_Polarity __parse_pwm_polarity(const char *start, const char *end)
 	}
 }
 
-PRPC_CMD(polarity_set)
+size_t prpc_cmd_polarity_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	enum PWM_Polarity   pol;
 	char *id_start, *id_end;
