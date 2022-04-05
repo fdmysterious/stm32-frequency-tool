@@ -30,6 +30,20 @@ struct PWM_Data pwm_ch1 = {
 	.pin_af     = GPIO_AF2_TIM4
 };
 
+struct PWM_Data pwm_ch2 = {
+	.tim        = TIM2,
+	.channel    = TIM_CHANNEL_1,
+	.pin_output = &PIN_PWM2_OUT,
+	.pin_af     = GPIO_AF1_TIM2
+};
+
+struct PWM_Data pwm_ch3 = {
+	.tim        = TIM1,
+	.channel    = TIM_CHANNEL_1,
+	.pin_output = &PIN_PWM3_OUT,
+	.pin_af     = GPIO_AF6_TIM1
+};
+
 
 /* ┌────────────────────────────────────────┐
    │ Private interface                      │
@@ -76,7 +90,6 @@ void pwm_init(struct PWM_Data *pwm)
 
 	/* Clock configure */
     __HAL_RCC_GPIOB_CLK_ENABLE();
-	__HAL_RCC_TIM4_CLK_ENABLE();
 
 	/* GPIO configure */
     gpio_conf.Pin                        = pwm->pin_output->pin;

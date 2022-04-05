@@ -29,9 +29,15 @@ struct GPIO_Pin {
    └────────────────────────────────────────┘ */
 
 extern const struct GPIO_Pin PIN_LD2;
+
 extern const struct GPIO_Pin PIN_USART_TX;
 extern const struct GPIO_Pin PIN_USART_RX;
+
 extern const struct GPIO_Pin PIN_PWM1_OUT;
+extern const struct GPIO_Pin PIN_PWM2_OUT;
+extern const struct GPIO_Pin PIN_PWM3_OUT;
+
+extern const struct GPIO_Pin PIN_FMETER1_IN;
 
 
 /* ┌────────────────────────────────────────┐

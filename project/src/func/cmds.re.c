@@ -4,6 +4,8 @@
 #include <prpc/msg.h>
 
 #include <io/pwm.h>
+#include <io/freqmeter.h>
+
 
 /* ┌────────────────────────────────────────┐
    │ Generic commands                       │
@@ -33,14 +35,14 @@ size_t prpc_cmd_hello(const char **ptr, char *resp_buf, const size_t max_resp_le
 
 /* ────────────── start/stop ────────────── */
 
-size_t prpc_cmd_start_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+size_t prpc_cmd_pwmx_start_set(struct PWM_Data *pwm, const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	uint8_t value;
 	PRPC_Status_t stat = prpc_cmd_parse_args(ptr,id,1,TOKEN_BOOLEAN,&value);
 
 	if(stat.status == PRPC_OK) {
-		if(value) pwm_start(&pwm_ch1);
-		else      pwm_stop (&pwm_ch1);
+		if(value) pwm_start(pwm);
+		else      pwm_stop (pwm);
 
 		return prpc_build_ok(resp_buf, max_resp_len, id);
 	}
@@ -50,14 +52,14 @@ size_t prpc_cmd_start_set(const char **ptr, char *resp_buf, const size_t max_res
 	}
 }
 
-size_t prpc_cmd_start_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+size_t prpc_cmd_pwmx_start_get(struct PWM_Data *pwm, const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
-	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_BOOLEAN, pwm_started_get(&pwm_ch1));
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_BOOLEAN, pwm_started_get(pwm));
 }
 
 /* ─────────────── frequency ────────────── */
 
-size_t prpc_cmd_freq_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+size_t prpc_cmd_pwmx_freq_set(struct PWM_Data *pwm, const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	float v;
 	PRPC_Status_t stat = prpc_cmd_parse_args(ptr, id, 1, TOKEN_FLOAT, &v);
@@ -65,7 +67,7 @@ size_t prpc_cmd_freq_set(const char **ptr, char *resp_buf, const size_t max_resp
 	if(stat.status == PRPC_OK) {
 		if((v < 0.f)) return prpc_build_error(resp_buf, max_resp_len, id, "Value must be >= 0.0");
 		else {
-			pwm_freq_set(&pwm_ch1, v);
+			pwm_freq_set(pwm, v);
 			return prpc_build_ok(resp_buf, max_resp_len, id);
 		}
 	}
@@ -78,7 +80,7 @@ size_t prpc_cmd_freq_set(const char **ptr, char *resp_buf, const size_t max_resp
 
 /* ───────────────── duty ───────────────── */
 
-size_t prpc_cmd_duty_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+size_t prpc_cmd_pwmx_duty_set(struct PWM_Data *pwm, const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	float v;
 	PRPC_Status_t stat = prpc_cmd_parse_args(ptr, id, 1, TOKEN_FLOAT, &v);
@@ -89,7 +91,7 @@ size_t prpc_cmd_duty_set(const char **ptr, char *resp_buf, const size_t max_resp
 		}
 
 		else {
-			pwm_duty_set(&pwm_ch1, v);
+			pwm_duty_set(pwm, v);
 			return prpc_build_ok(resp_buf, max_resp_len, id);
 		}
 	}
@@ -112,7 +114,7 @@ enum PWM_Polarity __parse_pwm_polarity(const char *start, const char *end)
 	}
 }
 
-size_t prpc_cmd_polarity_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+size_t prpc_cmd_pwmx_polarity_set(struct PWM_Data *pwm, const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
 {
 	enum PWM_Polarity   pol;
 	char *id_start, *id_end;
@@ -126,7 +128,7 @@ size_t prpc_cmd_polarity_set(const char **ptr, char *resp_buf, const size_t max_
 		}
 
 		else {
-			pwm_polarity_set(&pwm_ch1, pol);
+			pwm_polarity_set(pwm, pol);
 			return prpc_build_ok(resp_buf, max_resp_len, id);
 		}
 
@@ -136,6 +138,78 @@ size_t prpc_cmd_polarity_set(const char **ptr, char *resp_buf, const size_t max_
 		return prpc_build_error_status(resp_buf, max_resp_len, id, stat);
 	}
 }
+
+
+/* ┌────────────────────────────────────────┐
+   │ PWM commands for each channel          │
+   └────────────────────────────────────────┘ */
+
+/* ────────────── Start/Stop ────────────── */
+
+#define PWM_START_GET_IMPL(ch) size_t prpc_cmd_pwm##ch##_start_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+	return prpc_cmd_pwmx_start_get(&pwm_ch##ch, ptr, resp_buf, max_resp_len, id); \
+}
+
+PWM_START_GET_IMPL(1)
+PWM_START_GET_IMPL(2)
+PWM_START_GET_IMPL(3)
+
+#define PWM_START_SET_IMPL(ch) size_t prpc_cmd_pwm##ch##_start_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+	return prpc_cmd_pwmx_start_set(&pwm_ch##ch, ptr, resp_buf, max_resp_len, id); \
+}
+
+PWM_START_SET_IMPL(1)
+PWM_START_SET_IMPL(2)
+PWM_START_SET_IMPL(3)
+
+/* ─────────── Frequency control ────────── */
+
+#define PWM_FREQ_SET_IMPL(ch) size_t prpc_cmd_pwm##ch##_freq_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+	return prpc_cmd_pwmx_freq_set(&pwm_ch##ch, ptr, resp_buf, max_resp_len, id); \
+}
+
+PWM_FREQ_SET_IMPL(1)
+PWM_FREQ_SET_IMPL(2)
+PWM_FREQ_SET_IMPL(3)
+
+
+/* ───────────── Duty control ───────────── */
+
+#define PWM_DUTY_SET_IMPL(ch) size_t prpc_cmd_pwm##ch##_duty_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+	return prpc_cmd_pwmx_duty_set(&pwm_ch##ch, ptr, resp_buf, max_resp_len, id); \
+}
+
+PWM_DUTY_SET_IMPL(1)
+PWM_DUTY_SET_IMPL(2)
+PWM_DUTY_SET_IMPL(3)
+
+/* ─────────── Polarity control ─────────── */
+
+#define PWM_POLARITY_SET_IMPL(ch) size_t prpc_cmd_pwm##ch##_polarity_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+	return prpc_cmd_pwmx_polarity_set(&pwm_ch##ch, ptr, resp_buf, max_resp_len, id); \
+}
+
+PWM_POLARITY_SET_IMPL(1)
+PWM_POLARITY_SET_IMPL(2)
+PWM_POLARITY_SET_IMPL(3)
+
+
+/* ┌────────────────────────────────────────┐
+   │ Frequency meter commands               │
+   └────────────────────────────────────────┘ */
+
+size_t prpc_cmd_fmeter1_positive_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+{
+	float value = (float)fmeter1.movmean_positive.mean / FREQMETER_DIVIDE_FACTOR;
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_FLOAT, value);
+}
+
+size_t prpc_cmd_fmeter1_negative_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+{
+	float value = (float)fmeter1.movmean_negative.mean / FREQMETER_DIVIDE_FACTOR;
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_FLOAT, value);
+}
+
 
 
 /* ┌────────────────────────────────────────┐
@@ -154,15 +228,30 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 
         end = [ \t\r\n] | '\x00';
 
-        *                       { return NULL;                 }
-		'has'               end { return prpc_cmd_has;         }
-        'hello'             end { return prpc_cmd_hello;       }
+        *                          { return NULL;                         }
+		'has'                  end { return prpc_cmd_has;                 }
+        'hello'                end { return prpc_cmd_hello;               }
 
-		'pwm1/started/set'  end { return prpc_cmd_start_set;   }
-		'pwm1/started/get'  end { return prpc_cmd_start_get;   }
-		'pwm1/freq/set'     end { return prpc_cmd_freq_set;    }
-		'pwm1/duty/set'     end { return prpc_cmd_duty_set;    }
-		'pwm1/polarity/set' end { return prpc_cmd_polarity_set;}
+		'pwm1/started/set'     end { return prpc_cmd_pwm1_start_set;      }
+		'pwm1/started/get'     end { return prpc_cmd_pwm1_start_get;      }
+		'pwm1/freq/set'        end { return prpc_cmd_pwm1_freq_set;       }
+		'pwm1/duty/set'        end { return prpc_cmd_pwm1_duty_set;       }
+		'pwm1/polarity/set'    end { return prpc_cmd_pwm1_polarity_set;   }
+
+		'pwm2/started/set'     end { return prpc_cmd_pwm2_start_set;      }
+		'pwm2/started/get'     end { return prpc_cmd_pwm2_start_get;      }
+		'pwm2/freq/set'        end { return prpc_cmd_pwm2_freq_set;       }
+		'pwm2/duty/set'        end { return prpc_cmd_pwm2_duty_set;       }
+		'pwm2/polarity/set'    end { return prpc_cmd_pwm2_polarity_set;   }
+
+		'pwm3/started/set'     end { return prpc_cmd_pwm3_start_set;      }
+		'pwm3/started/get'     end { return prpc_cmd_pwm3_start_get;      }
+		'pwm3/freq/set'        end { return prpc_cmd_pwm3_freq_set;       }
+		'pwm3/duty/set'        end { return prpc_cmd_pwm3_duty_set;       }
+		'pwm3/polarity/set'    end { return prpc_cmd_pwm3_polarity_set;   }
+
+		'fmeter1/positive/get' end { return prpc_cmd_fmeter1_positive_get;}
+		'fmeter1/negative/get' end { return prpc_cmd_fmeter1_negative_get;}
      */
 }
 

@@ -14,11 +14,15 @@
    │ GPIO defines                           │
    └────────────────────────────────────────┘ */
 
-const struct GPIO_Pin PIN_LD2       = { .port = GPIOB, .pin = GPIO_PIN_13 };
-const struct GPIO_Pin PIN_USART_TX  = { .port = GPIOA, .pin = GPIO_PIN_2  };
-const struct GPIO_Pin PIN_USART_RX  = { .port = GPIOA, .pin = GPIO_PIN_3  };
+const struct GPIO_Pin PIN_LD2        = { .port = GPIOB, .pin = GPIO_PIN_13 };
+const struct GPIO_Pin PIN_USART_TX   = { .port = GPIOA, .pin = GPIO_PIN_2  };
+const struct GPIO_Pin PIN_USART_RX   = { .port = GPIOA, .pin = GPIO_PIN_3  };
 
-const struct GPIO_Pin PIN_PWM1_OUT  = { .port = GPIOB, .pin = GPIO_PIN_6  };
+const struct GPIO_Pin PIN_PWM1_OUT   = { .port = GPIOB, .pin = GPIO_PIN_6  };
+const struct GPIO_Pin PIN_PWM2_OUT   = { .port = GPIOA, .pin = GPIO_PIN_0  };
+const struct GPIO_Pin PIN_PWM3_OUT   = { .port = GPIOA, .pin = GPIO_PIN_8  };
+
+const struct GPIO_Pin PIN_FMETER1_IN = { .port = GPIOB, .pin = GPIO_PIN_14 };
 
 
 /* ┌────────────────────────────────────────┐
@@ -45,12 +49,6 @@ void gpio_init(void)
 	GPIO_InitTypeDef init;
 
 	/* GPIO enable port clocks */
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	__HAL_RCC_GPIOC_CLK_ENABLE();
-	__HAL_RCC_GPIOD_CLK_ENABLE();
-	__HAL_RCC_GPIOE_CLK_ENABLE();
-	__HAL_RCC_GPIOF_CLK_ENABLE();
 
 	/* Init LD2 */
 	init.Pin   = PIN_LD2.pin;

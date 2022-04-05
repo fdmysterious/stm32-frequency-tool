@@ -8,6 +8,7 @@ project(stm32-template C ASM)
 ####################################
 
 set(OUTPUT_PATH "/output")
+set(CMAKE_C_FLAGS "-O3")
 
 set(HAL_COMP_LIST RCC GPIO CORTEX DMA UART TIM STM32F3)
 set(CMSIS_COMP_LIST "")
@@ -45,9 +46,11 @@ set(PROJECT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/gpio.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/uart.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/pwm.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/io/freqmeter.c
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/func/error.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/func/cmds.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/func/movmean.c
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/stm32f3xx_hal_msp.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
