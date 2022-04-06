@@ -1,9 +1,9 @@
 [submodule "project/ext/stm32-cmake"]
 	path = project/ext/stm32-cmake
-	url = https://github.com/ObKo/stm32-cmake.git
+	url = https://github.com/ObKo/stm32-cmake
 [submodule "project/ext/STM32CubeF3"]
 	path = project/ext/STM32CubeF3
-	url = https://github.com/STMicroelectronics/STM32CubeF3.git
+	url = https://github.com/STMicroelectronics/STM32CubeF3
 [submodule "project/ext/printf"]
 	path = project/ext/printf
 	url = https://github.com/eyalroz/printf
