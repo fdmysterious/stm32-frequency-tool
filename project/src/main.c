@@ -49,6 +49,8 @@ int main(void)
 	pwm_init      (&pwm_ch3);
 
 	freqmeter_init(&fmeter1);
+	freqmeter_init(&fmeter2);
+	freqmeter_init(&fmeter3);
 
 	cmds_init();
 
@@ -56,6 +58,8 @@ int main(void)
 
 	uart_start();
 	freqmeter_start(&fmeter1);
+	freqmeter_start(&fmeter2);
+	freqmeter_start(&fmeter3);
 	
 	while(1) {
 		do {

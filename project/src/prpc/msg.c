@@ -30,7 +30,7 @@ static size_t _prpc_build_msg_va( char *buf, const size_t max_len, const size_t 
             break;
 
             case PRPC_INT:
-             len -= (written = snprintf( ptr, len, " %d", va_arg(args, int) ));
+             len -= (written = snprintf( ptr, len, " %llu", va_arg(args, uint64_t) ));
             break;
 
             case PRPC_FLOAT:

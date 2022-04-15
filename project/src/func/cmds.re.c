@@ -198,18 +198,29 @@ PWM_POLARITY_SET_IMPL(3)
    │ Frequency meter commands               │
    └────────────────────────────────────────┘ */
 
-size_t prpc_cmd_fmeter1_positive_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
-{
-	float value = (float)fmeter1.movmean_positive.mean / FREQMETER_DIVIDE_FACTOR;
-	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_FLOAT, value);
+#define FMETER_PERIOD_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_period_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+	uint64_t tmp = fmeter##num.movmean_period.mean;\
+	tmp         *= 1000000000UL;\
+	tmp         /= HAL_RCC_GetHCLKFreq();\
+\
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
 }
 
-size_t prpc_cmd_fmeter1_negative_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
-{
-	float value = (float)fmeter1.movmean_negative.mean / FREQMETER_DIVIDE_FACTOR;
-	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_FLOAT, value);
+#define FMETER_POSITIVE_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_positive_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+	uint64_t tmp = fmeter##num.movmean_positive.mean;\
+	tmp         *= 1000000000UL;\
+	tmp         /= HAL_RCC_GetHCLKFreq();\
+\
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
 }
 
+FMETER_PERIOD_GET_IMPL(1)
+FMETER_PERIOD_GET_IMPL(2)
+FMETER_PERIOD_GET_IMPL(3)
+
+FMETER_POSITIVE_GET_IMPL(1)
+FMETER_POSITIVE_GET_IMPL(2)
+FMETER_POSITIVE_GET_IMPL(3)
 
 
 /* ┌────────────────────────────────────────┐
@@ -250,8 +261,12 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 		'pwm3/duty/set'        end { return prpc_cmd_pwm3_duty_set;       }
 		'pwm3/polarity/set'    end { return prpc_cmd_pwm3_polarity_set;   }
 
+		'fmeter1/period/get'   end { return prpc_cmd_fmeter1_period_get;  }
 		'fmeter1/positive/get' end { return prpc_cmd_fmeter1_positive_get;}
-		'fmeter1/negative/get' end { return prpc_cmd_fmeter1_negative_get;}
+		'fmeter2/period/get'   end { return prpc_cmd_fmeter2_period_get;  }
+		'fmeter2/positive/get' end { return prpc_cmd_fmeter2_positive_get;}
+		'fmeter3/period/get'   end { return prpc_cmd_fmeter3_period_get;  }
+		'fmeter3/positive/get' end { return prpc_cmd_fmeter3_positive_get;}
      */
 }
 

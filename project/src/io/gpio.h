@@ -38,6 +38,8 @@ extern const struct GPIO_Pin PIN_PWM2_OUT;
 extern const struct GPIO_Pin PIN_PWM3_OUT;
 
 extern const struct GPIO_Pin PIN_FMETER1_IN;
+extern const struct GPIO_Pin PIN_FMETER2_IN;
+extern const struct GPIO_Pin PIN_FMETER3_IN;
 
 
 /* ┌────────────────────────────────────────┐

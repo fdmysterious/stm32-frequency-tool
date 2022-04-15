@@ -4,9 +4,6 @@
    
     Florian Dupeyron
     April 2022
-
-	This interfaces uses raw interrupt flags instead of HAL stuff
-	for Input capture channel.
 */
 
 #include "stm32f3xx_hal.h"
@@ -19,24 +16,43 @@
    │ Forward declarations                   │
    └────────────────────────────────────────┘ */
 
-void freqmeter_OVF_callback(TIM_HandleTypeDef *htim);
 void freqmeter_IC_callback (TIM_HandleTypeDef *htim);
+
+
 /* ┌────────────────────────────────────────┐
    │ Static data                            │
    └────────────────────────────────────────┘ */
 
 struct Freqmeter_Data fmeter1 = {
-	.tim         = TIM15,
+	.tim         = TIM2,
 	.channel     = TIM_CHANNEL_1,
 	.pin_input   = &PIN_FMETER1_IN,
-	.pin_af      = GPIO_AF1_TIM15,
-	.irq         = TIM1_BRK_TIM15_IRQn
+	.pin_af      = GPIO_AF1_TIM2,
+	.irq         = TIM2_IRQn
+};
+
+struct Freqmeter_Data fmeter2 = {
+	.tim         = TIM3,
+	.channel     = TIM_CHANNEL_2,
+	.pin_input   = &PIN_FMETER2_IN,
+	.pin_af      = GPIO_AF2_TIM3,
+	.irq         = TIM3_IRQn
+};
+
+struct Freqmeter_Data fmeter3 = {
+	.tim         = TIM4,
+	.channel     = TIM_CHANNEL_1,
+	.pin_input   = &PIN_FMETER3_IN,
+	.pin_af      = GPIO_AF2_TIM4,
+	.irq         = TIM4_IRQn
 };
 
 struct Freqmeter_Data* __fmeter_from_htim(TIM_HandleTypeDef *htim)
 {
-	if(htim == &fmeter1.htim) return &fmeter1;
-	else                      return    NULL;
+	if     (htim == &fmeter1.htim) return &fmeter1;
+	else if(htim == &fmeter2.htim) return &fmeter2;
+	else if(htim == &fmeter3.htim) return &fmeter3;
+	else                           return  NULL;
 }
 
 
@@ -46,19 +62,21 @@ struct Freqmeter_Data* __fmeter_from_htim(TIM_HandleTypeDef *htim)
 
 void __freqmeter_config_update(struct Freqmeter_Data *fmeter)
 {
-	/* Disable interrupt */
 	TIM_IC_InitTypeDef sConfigIC = {0};
 
 	/* Configure Input Capture */
 	sConfigIC.ICPolarity  = TIM_INPUTCHANNELPOLARITY_BOTHEDGE;
 	sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
 	sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-	sConfigIC.ICFilter    = 0;
+	sConfigIC.ICFilter    = 4;
 	if(HAL_TIM_IC_ConfigChannel(&fmeter->htim, &sConfigIC, fmeter->channel) != HAL_OK) error_handler();
 
-	/* Enable interrupt */
-	HAL_NVIC_SetPriority(fmeter->irq, 0, 0);
-	HAL_NVIC_EnableIRQ  (fmeter->irq);
+}
+
+uint8_t __freqmeter_complementary_channel(struct Freqmeter_Data *fmeter)
+{
+	if(fmeter->channel == TIM_CHANNEL_1) return TIM_CHANNEL_2;
+	else                                 return TIM_CHANNEL_1;
 }
 
 
@@ -68,7 +86,8 @@ void __freqmeter_config_update(struct Freqmeter_Data *fmeter)
 
 void freqmeter_init(struct Freqmeter_Data *fmeter)
 {
-	TIM_MasterConfigTypeDef sMasterConfig      = {0};
+	TIM_IC_InitTypeDef      sConfigIC          = {0};
+	TIM_SlaveConfigTypeDef  sSlaveConfig       = {0};
 	GPIO_InitTypeDef        gpio_conf          = {0};
 
 	/* HAL handler init */
@@ -81,10 +100,31 @@ void freqmeter_init(struct Freqmeter_Data *fmeter)
 	fmeter->htim.Init.AutoReloadPreload        = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if(HAL_TIM_IC_Init(&fmeter->htim) != HAL_OK) error_handler();
 
-	/* Master trigger config */
-	sMasterConfig.MasterOutputTrigger          = TIM_TRGO_RESET;
-	sMasterConfig.MasterSlaveMode              = TIM_MASTERSLAVEMODE_DISABLE;
-	if(HAL_TIMEx_MasterConfigSynchronization(&fmeter->htim, &sMasterConfig) != HAL_OK) error_handler();
+	/* Configure main input channel */
+	sConfigIC.ICPolarity                       = TIM_INPUTCHANNELPOLARITY_RISING;
+	sConfigIC.ICSelection                      = TIM_ICSELECTION_DIRECTTI;
+	sConfigIC.ICPrescaler                      = TIM_ICPSC_DIV1;
+	sConfigIC.ICFilter                         = 4;
+	if(HAL_TIM_IC_ConfigChannel(&fmeter->htim, &sConfigIC, fmeter->channel) != HAL_OK) error_handler();
+
+	/* Configure secondary input channel */
+	sConfigIC.ICPolarity                       = TIM_INPUTCHANNELPOLARITY_FALLING;
+	sConfigIC.ICSelection                      = TIM_ICSELECTION_INDIRECTTI;
+	sConfigIC.ICPrescaler                      = TIM_ICPSC_DIV1;
+	sConfigIC.ICFilter                         = 4;
+	if(HAL_TIM_IC_ConfigChannel(&fmeter->htim, &sConfigIC, __freqmeter_complementary_channel(fmeter)) != HAL_OK) error_handler();
+	
+	/* Slave reset config */
+	sSlaveConfig.SlaveMode    = TIM_SLAVEMODE_RESET;
+	sSlaveConfig.InputTrigger = fmeter->channel == TIM_CHANNEL_1 
+		? TIM_TS_TI1FP1
+		: TIM_TS_TI2FP2
+	;
+	sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_NONINVERTED;
+	sSlaveConfig.TriggerPrescaler= TIM_TRIGGERPRESCALER_DIV1;
+	sSlaveConfig.TriggerFilter   = 0;
+	if(HAL_TIM_SlaveConfigSynchro(&fmeter->htim, &sSlaveConfig) != HAL_OK) error_handler();
+	
 
 	/* GPIO Init */
     gpio_conf.Pin                              = fmeter->pin_input->pin;
@@ -94,106 +134,61 @@ void freqmeter_init(struct Freqmeter_Data *fmeter)
     gpio_conf.Alternate                        = fmeter->pin_af;
     HAL_GPIO_Init(fmeter->pin_input->port, &gpio_conf);
 
+
 	/* Movmean init */
-	moving_mean_init(&fmeter->movmean_negative);
+	moving_mean_init(&fmeter->movmean_period);
 	moving_mean_init(&fmeter->movmean_positive);
 
-	fmeter->last_negative = 0.f;
-	fmeter->last_positive = 0.f;
 
-	/* State init */
-	fmeter->state = FREQMETER_STATE_START;
-
-	/* Configure input channel and interrupt */
-	__freqmeter_config_update(fmeter);
+	/* Enable interrupt */
+	HAL_NVIC_SetPriority(fmeter->irq, 0, 0);
+	HAL_NVIC_EnableIRQ  (fmeter->irq);
 }
 
 void freqmeter_start(struct Freqmeter_Data *fmeter)
 {
-	HAL_TIM_IC_Start_IT(&fmeter->htim, fmeter->channel);
+	HAL_TIM_IC_Start_IT(&fmeter->htim, TIM_CHANNEL_1);
+	HAL_TIM_IC_Start_IT(&fmeter->htim, TIM_CHANNEL_2);
 }
 
 void freqmeter_stop(struct Freqmeter_Data *fmeter)
 {
-	HAL_TIM_IC_Stop_IT(&fmeter->htim, fmeter->channel);
+	HAL_TIM_IC_Stop_IT(&fmeter->htim, TIM_CHANNEL_1);
+	HAL_TIM_IC_Stop_IT(&fmeter->htim, TIM_CHANNEL_2);
 }
 
 /* ┌────────────────────────────────────────┐
    │ IRQ callbacks                          │
    └────────────────────────────────────────┘ */
 
-/* Period overflow callback */
-/* The value is reset and the last known value is saved	*/
-
-void freqmeter_OVF_callback(TIM_HandleTypeDef *htim)
-{
-	struct Freqmeter_Data *fmeter = __fmeter_from_htim(htim);
-	if(fmeter == NULL) return;
-
-	/* Save last known values, reset all stuff */
-	fmeter->last_negative = fmeter->movmean_negative.mean;
-	fmeter->last_positive = fmeter->movmean_positive.mean;
-
-	moving_mean_init(&fmeter->movmean_positive);
-	moving_mean_init(&fmeter->movmean_negative);
-
-	fmeter->state = FREQMETER_STATE_START;
-}
-
 /* Input capture callback */
 
 void freqmeter_IC_callback(TIM_HandleTypeDef *htim) 
 {
-	int32_t capture;
-	int32_t diff;
+	uint8_t comp_channel;
+	uint8_t active_channel;
+
+	int32_t capture_period;
+	int32_t capture_duty;
+
 	struct Freqmeter_Data *fmeter;
 
 	/* Find correct fmeter instance */
 	fmeter = __fmeter_from_htim(htim);
 	if(fmeter == NULL) return;
 
-	capture = __HAL_TIM_GET_COMPARE(&fmeter->htim, fmeter->channel);
+	comp_channel   = __freqmeter_complementary_channel(fmeter);
+	active_channel = (fmeter->channel == TIM_CHANNEL_1)
+		? HAL_TIM_ACTIVE_CHANNEL_1
+		: HAL_TIM_ACTIVE_CHANNEL_2
+	;
 
-	/* Get capture value */
-	diff    = (fmeter->last > capture) ? (1<<16) : 0;
-	diff   += capture;
-	diff   -= fmeter->last;
+	if(fmeter->htim.Channel == active_channel) {
+		capture_period   = HAL_TIM_ReadCapturedValue(htim, fmeter->channel);
+		capture_duty     = HAL_TIM_ReadCapturedValue(htim, comp_channel   );
 
-	fmeter->last = capture;
-
-
-	/* Process value from edge and current state */
-	switch(fmeter->state) {
-		default:
-		case FREQMETER_STATE_START:
-			/* Rising edge */
-			if(gpio_pin_get(*fmeter->pin_input)) {
-				fmeter->state = FREQMETER_STATE_POSITIVE;
-				moving_mean_push(&fmeter->movmean_positive, diff);
-			}
-
-			/* Falling edge */
-			else {
-				fmeter->state = FREQMETER_STATE_NEGATIVE;
-				moving_mean_push(&fmeter->movmean_negative, diff);
-			}
-			break;
-
-		case FREQMETER_STATE_POSITIVE:
-			/* Was falling edge */
-			if(!gpio_pin_get(*fmeter->pin_input)) {
-				moving_mean_push(&fmeter->movmean_positive, diff);
-				fmeter->state = FREQMETER_STATE_NEGATIVE;
-			}
-			break;
-
-		case FREQMETER_STATE_NEGATIVE:
-			/* Was rising edge */
-			if(gpio_pin_get(*fmeter->pin_input)) {
-				moving_mean_push(&fmeter->movmean_negative, diff);
-				fmeter->state = FREQMETER_STATE_POSITIVE;
-			}
-			break;
+		moving_mean_push(&fmeter->movmean_period, capture_period );
+		moving_mean_push(&fmeter->movmean_positive, capture_duty );
 	}
 }
 
@@ -202,9 +197,20 @@ void freqmeter_IC_callback(TIM_HandleTypeDef *htim)
    │ IRQHandlers                            │
    └────────────────────────────────────────┘ */
 
-void TIM1_BRK_TIM15_IRQHandler(void)
+void TIM2_IRQHandler(void)
 {
 	HAL_TIM_IRQHandler(&fmeter1.htim);
+}
+
+void TIM3_IRQHandler(void)
+{
+	gpio_led_toggle();
+	HAL_TIM_IRQHandler(&fmeter2.htim);
+}
+
+void TIM4_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&fmeter3.htim);
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)

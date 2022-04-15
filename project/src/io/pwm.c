@@ -16,7 +16,7 @@
    │ Config constants                       │
    └────────────────────────────────────────┘ */
 
-#define PWM_TIMER_FREQUENCY 32000000
+#define PWM_TIMER_FREQUENCY HAL_RCC_GetHCLKFreq()
 
 
 /* ┌────────────────────────────────────────┐
@@ -24,24 +24,24 @@
    └────────────────────────────────────────┘ */
 
 struct PWM_Data pwm_ch1 = {
-	.tim        = TIM4,
+	.tim        = TIM15,
 	.channel    = TIM_CHANNEL_1,
 	.pin_output = &PIN_PWM1_OUT,
-	.pin_af     = GPIO_AF2_TIM4
+	.pin_af     = GPIO_AF1_TIM15
 };
 
 struct PWM_Data pwm_ch2 = {
-	.tim        = TIM2,
+	.tim        = TIM16,
 	.channel    = TIM_CHANNEL_1,
 	.pin_output = &PIN_PWM2_OUT,
-	.pin_af     = GPIO_AF1_TIM2
+	.pin_af     = GPIO_AF1_TIM16
 };
 
 struct PWM_Data pwm_ch3 = {
-	.tim        = TIM1,
+	.tim        = TIM17,
 	.channel    = TIM_CHANNEL_1,
 	.pin_output = &PIN_PWM3_OUT,
-	.pin_af     = GPIO_AF6_TIM1
+	.pin_af     = GPIO_AF1_TIM17
 };
 
 
