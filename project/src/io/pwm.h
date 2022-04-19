@@ -45,6 +45,7 @@ struct PWM_Data {
 extern struct PWM_Data pwm_ch1;
 extern struct PWM_Data pwm_ch2;
 extern struct PWM_Data pwm_ch3;
+extern struct PWM_Data pwm_ch4;
 
 
 /* ┌────────────────────────────────────────┐

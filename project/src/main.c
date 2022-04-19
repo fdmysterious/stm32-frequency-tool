@@ -47,6 +47,7 @@ int main(void)
 	pwm_init      (&pwm_ch1);
 	pwm_init      (&pwm_ch2);
 	pwm_init      (&pwm_ch3);
+	pwm_init      (&pwm_ch4);
 
 	freqmeter_init(&fmeter1);
 	freqmeter_init(&fmeter2);

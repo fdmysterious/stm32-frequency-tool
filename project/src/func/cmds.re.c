@@ -153,6 +153,7 @@ size_t prpc_cmd_pwmx_polarity_set(struct PWM_Data *pwm, const char **ptr, char *
 PWM_START_GET_IMPL(1)
 PWM_START_GET_IMPL(2)
 PWM_START_GET_IMPL(3)
+PWM_START_GET_IMPL(4)
 
 #define PWM_START_SET_IMPL(ch) size_t prpc_cmd_pwm##ch##_start_set(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
 	return prpc_cmd_pwmx_start_set(&pwm_ch##ch, ptr, resp_buf, max_resp_len, id); \
@@ -161,6 +162,7 @@ PWM_START_GET_IMPL(3)
 PWM_START_SET_IMPL(1)
 PWM_START_SET_IMPL(2)
 PWM_START_SET_IMPL(3)
+PWM_START_SET_IMPL(4)
 
 /* ─────────── Frequency control ────────── */
 
@@ -171,6 +173,7 @@ PWM_START_SET_IMPL(3)
 PWM_FREQ_SET_IMPL(1)
 PWM_FREQ_SET_IMPL(2)
 PWM_FREQ_SET_IMPL(3)
+PWM_FREQ_SET_IMPL(4)
 
 
 /* ───────────── Duty control ───────────── */
@@ -182,6 +185,7 @@ PWM_FREQ_SET_IMPL(3)
 PWM_DUTY_SET_IMPL(1)
 PWM_DUTY_SET_IMPL(2)
 PWM_DUTY_SET_IMPL(3)
+PWM_DUTY_SET_IMPL(4)
 
 /* ─────────── Polarity control ─────────── */
 
@@ -192,27 +196,12 @@ PWM_DUTY_SET_IMPL(3)
 PWM_POLARITY_SET_IMPL(1)
 PWM_POLARITY_SET_IMPL(2)
 PWM_POLARITY_SET_IMPL(3)
+PWM_POLARITY_SET_IMPL(4)
 
 
 /* ┌────────────────────────────────────────┐
    │ Frequency meter commands               │
    └────────────────────────────────────────┘ */
-
-//#define FMETER_PERIOD_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_period_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
-//	uint64_t tmp = fmeter##num.movmean_period.mean;\
-//	tmp         *= 1000000000UL;\
-//	tmp         /= HAL_RCC_GetHCLKFreq();\
-//\
-//	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
-//}
-//
-//#define FMETER_POSITIVE_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_positive_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
-//	uint64_t tmp = fmeter##num.movmean_positive.mean;\
-//	tmp         *= 1000000000UL;\
-//	tmp         /= HAL_RCC_GetHCLKFreq();\
-//\
-//	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
-//}
 
 #define FMETER_PERIOD_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_period_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
 	float tmp = (float)fmeter##num.movmean_period.mean/((float)HAL_RCC_GetHCLKFreq()/1e6f);\
@@ -270,6 +259,12 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 		'pwm/3/freq/set'        end { return prpc_cmd_pwm3_freq_set;       }
 		'pwm/3/duty/set'        end { return prpc_cmd_pwm3_duty_set;       }
 		'pwm/3/polarity/set'    end { return prpc_cmd_pwm3_polarity_set;   }
+
+		'pwm/4/started/set'     end { return prpc_cmd_pwm4_start_set;      }
+		'pwm/4/started/get'     end { return prpc_cmd_pwm4_start_get;      }
+		'pwm/4/freq/set'        end { return prpc_cmd_pwm4_freq_set;       }
+		'pwm/4/duty/set'        end { return prpc_cmd_pwm4_duty_set;       }
+		'pwm/4/polarity/set'    end { return prpc_cmd_pwm4_polarity_set;   }
 
 		'fmeter/1/period/get'   end { return prpc_cmd_fmeter1_period_get;  }
 		'fmeter/1/positive/get' end { return prpc_cmd_fmeter1_positive_get;}

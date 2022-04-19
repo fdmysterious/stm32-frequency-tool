@@ -47,6 +47,13 @@ struct PWM_Data pwm_ch3 = {
 	.pin_af     = GPIO_AF1_TIM17
 };
 
+struct PWM_Data pwm_ch4 = {
+	.tim        = TIM1,
+	.channel    = TIM_CHANNEL_1,
+	.pin_output = &PIN_PWM4_OUT,
+	.pin_af     = GPIO_AF6_TIM1
+};
+
 
 /* ┌────────────────────────────────────────┐
    │ Private interface                      │
@@ -58,7 +65,7 @@ static void pwm_update_config(struct PWM_Data *pwm)
 	 * O(1) algorithm, where the minimum prescaler to have
 	 * period <= 65535 is found, then the period is computed
 	 * properly. This simple algorithm gives overall good results,
-	 * with 1.6% error @ 100 kHz, and < 0.01% error at 10kHz.
+	 * with 0.16% error @ 100 kHz, and < 0.01% error at 10kHz.
 	 * This algorithm also minimizes the error for the duty cycle.*/
 	
 	TIM_OC_InitTypeDef  sConfigOC = {0};
@@ -72,18 +79,22 @@ static void pwm_update_config(struct PWM_Data *pwm)
 
 	HAL_TIM_PWM_Stop(&pwm->htim, pwm->channel);
 
-	/* Compute period */
+	/* Compute min. prescaler and period */
 	prescaler = ceilf((float)clk/( ((float)(1<<16)) * pwm->freq ));
 	period    = ((float)clk)/(prescaler*pwm->freq);
 
 	/* Compute duty cycle */
-	duty = (uint16_t)(period*pwm->duty);
+	duty      = (uint16_t)(period*pwm->duty);
 
 	/* Update period and prescaler in config */
 	pwm->htim.Init.Period     = (uint32_t)period;
-	pwm->htim.Init.Prescaler  = (uint32_t)prescaler - 1;
+	pwm->htim.Init.Prescaler  = (uint32_t)(prescaler - 1.f);
 	pwm->htim.Instance->ARR   = (uint32_t)period;
-	pwm->htim.Instance->PSC   = (uint32_t)prescaler - 1;
+	pwm->htim.Instance->PSC   = (uint32_t)(prescaler - 1.f);
+
+	/* Generate an update event to reload the Prescaler
+	   and the repetition counter (only for advanced timer) value immediately */
+	pwm->htim.Instance->EGR = TIM_EGR_UG;
 
 	/* Update OC config */
 	sConfigOC.OCMode          = TIM_OCMODE_PWM1;
@@ -92,6 +103,8 @@ static void pwm_update_config(struct PWM_Data *pwm)
 	sConfigOC.OCFastMode      = TIM_OCFAST_DISABLE;
 
 	if(HAL_TIM_PWM_ConfigChannel(&pwm->htim, &sConfigOC, pwm->channel) != HAL_OK) error_handler();
+
+	/* Restart PWM if needed */
 	if(pwm->started) HAL_TIM_PWM_Start(&pwm->htim, pwm->channel);
 }
 
