@@ -26,9 +26,10 @@ int parse_int( const char *start, const char *end )
 
 float parse_float( const char *start, const char *end )
 {
+	float r            = 0.f;
+
     int sig            = 1;
     uint32_t mul       = 1;
-    uint32_t div       = 1;
 
     uint32_t p         = 0;
 
@@ -42,13 +43,20 @@ float parse_float( const char *start, const char *end )
     const char *ptr;
     for( ptr = end ; ptr != start ; ptr-- ) {
         char c = *(ptr-1);
-        if( c == '.' ) dot = (ptr-1);
-        else {
-            p += (c-'0')*mul;
-            mul *= 10;
-            if( dot == NULL ) div *= 10;
-        }
+		if(c == '.') {
+			r   = (float)p / (float)mul;
+
+			p   = 0;
+			mul = 1;
+		}
+
+		else {
+			p   += (c-'0')*mul;
+			mul *= 10;
+		}
     }
 
-    return (float)sig * ((float)p / (float)div);
+	r += (float)p;
+
+	return sig * r;
 }
