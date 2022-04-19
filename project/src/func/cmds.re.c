@@ -253,30 +253,30 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 		'has'                  end { return prpc_cmd_has;                 }
         'hello'                end { return prpc_cmd_hello;               }
 
-		'pwm1/started/set'     end { return prpc_cmd_pwm1_start_set;      }
-		'pwm1/started/get'     end { return prpc_cmd_pwm1_start_get;      }
-		'pwm1/freq/set'        end { return prpc_cmd_pwm1_freq_set;       }
-		'pwm1/duty/set'        end { return prpc_cmd_pwm1_duty_set;       }
-		'pwm1/polarity/set'    end { return prpc_cmd_pwm1_polarity_set;   }
+		'pwm/1/started/set'     end { return prpc_cmd_pwm1_start_set;      }
+		'pwm/1/started/get'     end { return prpc_cmd_pwm1_start_get;      }
+		'pwm/1/freq/set'        end { return prpc_cmd_pwm1_freq_set;       }
+		'pwm/1/duty/set'        end { return prpc_cmd_pwm1_duty_set;       }
+		'pwm/1/polarity/set'    end { return prpc_cmd_pwm1_polarity_set;   }
 
-		'pwm2/started/set'     end { return prpc_cmd_pwm2_start_set;      }
-		'pwm2/started/get'     end { return prpc_cmd_pwm2_start_get;      }
-		'pwm2/freq/set'        end { return prpc_cmd_pwm2_freq_set;       }
-		'pwm2/duty/set'        end { return prpc_cmd_pwm2_duty_set;       }
-		'pwm2/polarity/set'    end { return prpc_cmd_pwm2_polarity_set;   }
+		'pwm/2/started/set'     end { return prpc_cmd_pwm2_start_set;      }
+		'pwm/2/started/get'     end { return prpc_cmd_pwm2_start_get;      }
+		'pwm/2/freq/set'        end { return prpc_cmd_pwm2_freq_set;       }
+		'pwm/2/duty/set'        end { return prpc_cmd_pwm2_duty_set;       }
+		'pwm/2/polarity/set'    end { return prpc_cmd_pwm2_polarity_set;   }
 
-		'pwm3/started/set'     end { return prpc_cmd_pwm3_start_set;      }
-		'pwm3/started/get'     end { return prpc_cmd_pwm3_start_get;      }
-		'pwm3/freq/set'        end { return prpc_cmd_pwm3_freq_set;       }
-		'pwm3/duty/set'        end { return prpc_cmd_pwm3_duty_set;       }
-		'pwm3/polarity/set'    end { return prpc_cmd_pwm3_polarity_set;   }
+		'pwm/3/started/set'     end { return prpc_cmd_pwm3_start_set;      }
+		'pwm/3/started/get'     end { return prpc_cmd_pwm3_start_get;      }
+		'pwm/3/freq/set'        end { return prpc_cmd_pwm3_freq_set;       }
+		'pwm/3/duty/set'        end { return prpc_cmd_pwm3_duty_set;       }
+		'pwm/3/polarity/set'    end { return prpc_cmd_pwm3_polarity_set;   }
 
-		'fmeter1/period/get'   end { return prpc_cmd_fmeter1_period_get;  }
-		'fmeter1/positive/get' end { return prpc_cmd_fmeter1_positive_get;}
-		'fmeter2/period/get'   end { return prpc_cmd_fmeter2_period_get;  }
-		'fmeter2/positive/get' end { return prpc_cmd_fmeter2_positive_get;}
-		'fmeter3/period/get'   end { return prpc_cmd_fmeter3_period_get;  }
-		'fmeter3/positive/get' end { return prpc_cmd_fmeter3_positive_get;}
+		'fmeter/1/period/get'   end { return prpc_cmd_fmeter1_period_get;  }
+		'fmeter/1/positive/get' end { return prpc_cmd_fmeter1_positive_get;}
+		'fmeter/2/period/get'   end { return prpc_cmd_fmeter2_period_get;  }
+		'fmeter/2/positive/get' end { return prpc_cmd_fmeter2_positive_get;}
+		'fmeter/3/period/get'   end { return prpc_cmd_fmeter3_period_get;  }
+		'fmeter/3/positive/get' end { return prpc_cmd_fmeter3_positive_get;}
      */
 }
 
