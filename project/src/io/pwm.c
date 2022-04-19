@@ -9,8 +9,11 @@
 #include "stm32f3xx_hal.h"
 #include "pwm.h"
 
+#include <math.h>
+
 #include <io/gpio.h>
 #include <func/error.h>
+
 
 /* ┌────────────────────────────────────────┐
    │ Config constants                       │
@@ -51,27 +54,42 @@ struct PWM_Data pwm_ch3 = {
 
 static void pwm_update_config(struct PWM_Data *pwm)
 {
-	TIM_OC_InitTypeDef sConfigOC = {0};
-	uint16_t                      duty;
-	uint32_t                    period;
+	/* Period and prescaler are calculated using a simple
+	 * O(1) algorithm, where the minimum prescaler to have
+	 * period <= 65535 is found, then the period is computed
+	 * properly. This simple algorithm gives overall good results,
+	 * with 1.6% error @ 100 kHz, and < 0.01% error at 10kHz.
+	 * This algorithm also minimizes the error for the duty cycle.*/
+	
+	TIM_OC_InitTypeDef  sConfigOC = {0};
+
+	uint32_t            clk       = PWM_TIMER_FREQUENCY;
+
+	float               prescaler = 0;
+	float               period    = 0;
+
+	uint32_t            duty      = 0;
 
 	HAL_TIM_PWM_Stop(&pwm->htim, pwm->channel);
 
 	/* Compute period */
-	period = (uint32_t)((float)PWM_TIMER_FREQUENCY/pwm->freq);
+	prescaler = ceilf((float)clk/( ((float)(1<<16)) * pwm->freq ));
+	period    = ((float)clk)/(prescaler*pwm->freq);
 
 	/* Compute duty cycle */
-	duty = (uint16_t)((float)(period)*pwm->duty);
+	duty = (uint16_t)(period*pwm->duty);
 
-	/* Update period */
-	pwm->htim.Init.Period   = period;
-	pwm->htim.Instance->ARR = period;
+	/* Update period and prescaler in config */
+	pwm->htim.Init.Period     = (uint32_t)period;
+	pwm->htim.Init.Prescaler  = (uint32_t)prescaler - 1;
+	pwm->htim.Instance->ARR   = (uint32_t)period;
+	pwm->htim.Instance->PSC   = (uint32_t)prescaler - 1;
 
 	/* Update OC config */
-	sConfigOC.OCMode        = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse         = duty;
-	sConfigOC.OCPolarity    = (pwm->polarity == PWM_POSITIVE) ? TIM_OCPOLARITY_HIGH : TIM_OCPOLARITY_LOW;
-	sConfigOC.OCFastMode    = TIM_OCFAST_DISABLE;
+	sConfigOC.OCMode          = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse           = duty;
+	sConfigOC.OCPolarity      = (pwm->polarity == PWM_POSITIVE) ? TIM_OCPOLARITY_HIGH : TIM_OCPOLARITY_LOW;
+	sConfigOC.OCFastMode      = TIM_OCFAST_DISABLE;
 
 	if(HAL_TIM_PWM_ConfigChannel(&pwm->htim, &sConfigOC, pwm->channel) != HAL_OK) error_handler();
 	if(pwm->started) HAL_TIM_PWM_Start(&pwm->htim, pwm->channel);
@@ -88,26 +106,23 @@ void pwm_init(struct PWM_Data *pwm)
 	TIM_ClockConfigTypeDef  sClockSourceConfig = {0};
 	TIM_MasterConfigTypeDef sMasterConfig      = {0};
 
-	/* Clock configure */
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-
 	/* GPIO configure */
-    gpio_conf.Pin                        = pwm->pin_output->pin;
-    gpio_conf.Mode                       = GPIO_MODE_AF_PP;
-    gpio_conf.Pull                       = GPIO_NOPULL;
-    gpio_conf.Speed                      = GPIO_SPEED_FREQ_LOW;
-    gpio_conf.Alternate                  = pwm->pin_af;
+    gpio_conf.Pin                     = pwm->pin_output->pin;
+    gpio_conf.Mode                    = GPIO_MODE_AF_PP;
+    gpio_conf.Pull                    = GPIO_NOPULL;
+    gpio_conf.Speed                   = GPIO_SPEED_FREQ_LOW;
+    gpio_conf.Alternate               = pwm->pin_af;
     HAL_GPIO_Init(pwm->pin_output->port, &gpio_conf);
 
 	/* Timer configure */
 
 	/* → Generic handle */
-	pwm->htim.Instance               = pwm->tim;
-	pwm->htim.Init.Prescaler         = 0;
-	pwm->htim.Init.CounterMode       = TIM_COUNTERMODE_UP;
-	pwm->htim.Init.Period            = 0;
-	pwm->htim.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
-	pwm->htim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	pwm->htim.Instance                = pwm->tim;
+	pwm->htim.Init.Prescaler          = 0;
+	pwm->htim.Init.CounterMode        = TIM_COUNTERMODE_UP;
+	pwm->htim.Init.Period             = 0;
+	pwm->htim.Init.ClockDivision      = TIM_CLOCKDIVISION_DIV1;
+	pwm->htim.Init.AutoReloadPreload  = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	if(HAL_TIM_Base_Init(&pwm->htim) != HAL_OK) error_handler();
 
 	/* Clock source config */
@@ -118,8 +133,8 @@ void pwm_init(struct PWM_Data *pwm)
 	if(HAL_TIM_PWM_Init(&pwm->htim) != HAL_OK) error_handler();
 
 	/* Trigger config */
-	sMasterConfig.MasterOutputTrigger    = TIM_TRGO_RESET;
-	sMasterConfig.MasterSlaveMode        = TIM_MASTERSLAVEMODE_DISABLE;
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterSlaveMode     = TIM_MASTERSLAVEMODE_DISABLE;
 	if(HAL_TIMEx_MasterConfigSynchronization(&pwm->htim, &sMasterConfig) != HAL_OK) error_handler();
 
 	/* Initial config */

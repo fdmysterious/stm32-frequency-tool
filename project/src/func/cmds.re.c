@@ -198,20 +198,30 @@ PWM_POLARITY_SET_IMPL(3)
    │ Frequency meter commands               │
    └────────────────────────────────────────┘ */
 
+//#define FMETER_PERIOD_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_period_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+//	uint64_t tmp = fmeter##num.movmean_period.mean;\
+//	tmp         *= 1000000000UL;\
+//	tmp         /= HAL_RCC_GetHCLKFreq();\
+//\
+//	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
+//}
+//
+//#define FMETER_POSITIVE_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_positive_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
+//	uint64_t tmp = fmeter##num.movmean_positive.mean;\
+//	tmp         *= 1000000000UL;\
+//	tmp         /= HAL_RCC_GetHCLKFreq();\
+//\
+//	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
+//}
+
 #define FMETER_PERIOD_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_period_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
-	uint64_t tmp = fmeter##num.movmean_period.mean;\
-	tmp         *= 1000000000UL;\
-	tmp         /= HAL_RCC_GetHCLKFreq();\
-\
-	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
+	float tmp = (float)fmeter##num.movmean_period.mean/((float)HAL_RCC_GetHCLKFreq()/1e6f);\
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_FLOAT, tmp);\
 }
 
 #define FMETER_POSITIVE_GET_IMPL(num) size_t prpc_cmd_fmeter##num##_positive_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id) {\
-	uint64_t tmp = fmeter##num.movmean_positive.mean;\
-	tmp         *= 1000000000UL;\
-	tmp         /= HAL_RCC_GetHCLKFreq();\
-\
-	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_INT, tmp);\
+	float tmp = (float)fmeter##num.movmean_positive.mean/((float)HAL_RCC_GetHCLKFreq()/1e6f);\
+	return prpc_build_result(resp_buf, max_resp_len, id, 1, PRPC_FLOAT, tmp);\
 }
 
 FMETER_PERIOD_GET_IMPL(1)
