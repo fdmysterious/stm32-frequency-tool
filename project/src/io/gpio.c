@@ -10,34 +10,19 @@
 #include "gpio.h"
 #include "stm32f3xx_hal.h"
 
-/* ┌────────────────────────────────────────┐
-   │ GPIO defines                           │
-   └────────────────────────────────────────┘ */
-
-const struct GPIO_Pin PIN_LD2        = { .port = GPIOB, .pin = GPIO_PIN_13 };
-const struct GPIO_Pin PIN_USART_TX   = { .port = GPIOA, .pin = GPIO_PIN_2  };
-const struct GPIO_Pin PIN_USART_RX   = { .port = GPIOA, .pin = GPIO_PIN_3  };
-
-const struct GPIO_Pin PIN_PWM1_OUT   = { .port = GPIOB, .pin = GPIO_PIN_14 };
-const struct GPIO_Pin PIN_PWM2_OUT   = { .port = GPIOA, .pin = GPIO_PIN_12 };
-const struct GPIO_Pin PIN_PWM3_OUT   = { .port = GPIOA, .pin = GPIO_PIN_7  };
-const struct GPIO_Pin PIN_PWM4_OUT   = { .port = GPIOA, .pin = GPIO_PIN_8  };
-
-const struct GPIO_Pin PIN_FMETER1_IN = { .port = GPIOA, .pin = GPIO_PIN_0  };
-const struct GPIO_Pin PIN_FMETER2_IN = { .port = GPIOA, .pin = GPIO_PIN_4  };
-const struct GPIO_Pin PIN_FMETER3_IN = { .port = GPIOB, .pin = GPIO_PIN_6  };
+#include <bsp/pin.h>
 
 
 /* ┌────────────────────────────────────────┐
    │ Pin control interface                  │
    └────────────────────────────────────────┘ */
 
-void gpio_pin_set(struct GPIO_Pin pin, uint8_t value)
+void gpio_pin_set(struct Pin pin, uint8_t value)
 {
 	HAL_GPIO_WritePin(pin.port, pin.pin, value);
 }
 
-uint8_t gpio_pin_get(struct GPIO_Pin pin)
+uint8_t gpio_pin_get(struct Pin pin)
 {
 	return HAL_GPIO_ReadPin(pin.port, pin.pin);
 }

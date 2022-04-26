@@ -32,8 +32,8 @@ struct PWM_Data {
 	float                    freq;
 	float                    duty;
 	
-	const struct GPIO_Pin   *pin_output; /* Pointer to pin definition */
-	uint32_t                 pin_af;     /* Pin alternate function */
+	const struct Pin        *pin_output; /* Pointer to pin definition */
+	uint32_t                 pin_af;     /* Pin alternate function    */
 };
 
 

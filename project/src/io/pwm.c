@@ -11,8 +11,8 @@
 
 #include <math.h>
 
-#include <io/gpio.h>
 #include <func/error.h>
+#include <bsp/pin.h>
 
 
 /* ┌────────────────────────────────────────┐

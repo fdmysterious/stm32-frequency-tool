@@ -11,12 +11,11 @@
 
 #include "uart.h"
 #include "stm32f3xx_hal.h"
-#include "gpio.h"
 
 #include <memory.h>
 #include <func/error.h>
 
-#include <io/gpio.h>
+#include <bsp/pin.h>
 
 /* ┌────────────────────────────────────────┐
    │ Data struct                            │

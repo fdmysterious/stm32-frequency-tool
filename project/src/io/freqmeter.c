@@ -9,6 +9,7 @@
 #include "stm32f3xx_hal.h"
 #include "freqmeter.h"
 
+#include <bsp/pin.h>
 #include <func/error.h>
 
 

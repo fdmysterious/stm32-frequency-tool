@@ -24,7 +24,7 @@ struct Freqmeter_Data {
 	uint32_t                    channel;
 	uint32_t                    irq;
 
-	const struct GPIO_Pin      *pin_input;
+	const struct Pin           *pin_input;
 	uint32_t                    pin_af;
 
 	struct Moving_Mean_Data     movmean_period;

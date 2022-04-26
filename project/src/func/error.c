@@ -7,6 +7,8 @@
 */
 
 #include "error.h"
+
+#include <bsp/pin.h>
 #include <io/gpio.h>
 
 void error_handler(void)

@@ -42,6 +42,9 @@ set(PROJECT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/prpc/parse.c
 
 	${CMAKE_CURRENT_SOURCE_DIR}/ext/printf/src/printf/printf.c
+
+	${CMAKE_CURRENT_SOURCE_DIR}/src/bsp/pin.c
+
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/clock.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/gpio.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/io/uart.c
