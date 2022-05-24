@@ -39,3 +39,5 @@ extern const struct Pin PIN_PWM4_OUT;
 extern const struct Pin PIN_FMETER1_IN;
 extern const struct Pin PIN_FMETER2_IN;
 extern const struct Pin PIN_FMETER3_IN;
+
+extern const struct Pin PIN_ACOMP_IN;

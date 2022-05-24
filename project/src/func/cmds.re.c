@@ -5,6 +5,7 @@
 
 #include <io/pwm.h>
 #include <io/freqmeter.h>
+#include <io/acomp.h>
 
 
 /* ┌────────────────────────────────────────┐
@@ -223,6 +224,19 @@ FMETER_POSITIVE_GET_IMPL(3)
 
 
 /* ┌────────────────────────────────────────┐
+   │ ACOMP commands                         │
+   └────────────────────────────────────────┘ */
+
+size_t prpc_cmd_acomp_value_get(const char **ptr, char *resp_buf, const size_t max_resp_len, PRPC_ID_t id)
+{
+	uint8_t v_acomp = acomp_value_get(&acomp);
+	return prpc_build_result_boolean(resp_buf, max_resp_len, id, v_acomp);
+}
+
+
+
+
+/* ┌────────────────────────────────────────┐
    │ Function name parser                   │
    └────────────────────────────────────────┘ */
 
@@ -272,6 +286,8 @@ PRPC_Parse_Function_t prpc_cmd_parser_get( const char **ptr, const char *end )
 		'fmeter/2/positive/get' end { return prpc_cmd_fmeter2_positive_get;}
 		'fmeter/3/period/get'   end { return prpc_cmd_fmeter3_period_get;  }
 		'fmeter/3/positive/get' end { return prpc_cmd_fmeter3_positive_get;}
+
+		'acomp/value/get'       end { return prpc_cmd_acomp_value_get;     }
      */
 }
 

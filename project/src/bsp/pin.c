@@ -25,3 +25,5 @@ const struct Pin PIN_PWM4_OUT   = { .port = GPIOA, .pin = GPIO_PIN_8  };
 const struct Pin PIN_FMETER1_IN = { .port = GPIOA, .pin = GPIO_PIN_0  };
 const struct Pin PIN_FMETER2_IN = { .port = GPIOA, .pin = GPIO_PIN_4  };
 const struct Pin PIN_FMETER3_IN = { .port = GPIOB, .pin = GPIO_PIN_6  };
+
+const struct Pin PIN_ACOMP_IN   = { .port = GPIOA, .pin = GPIO_PIN_1  };

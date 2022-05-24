@@ -12,14 +12,23 @@
 
 #include <printf/printf.h>
 
+#include <bsp/pin.h>
+
 #include <io/clock.h>
 #include <io/gpio.h>
 #include <io/uart.h>
 #include <io/pwm.h>
 #include <io/freqmeter.h>
+#include <io/acomp.h>
 
 
 #include <func/cmds.h>
+
+/* ┌────────────────────────────────────────┐
+   │ Static data                            │
+   └────────────────────────────────────────┘ */
+
+
 
 /* ┌────────────────────────────────────────┐
    │ Main program                           │
@@ -53,6 +62,8 @@ int main(void)
 	freqmeter_init(&fmeter2);
 	freqmeter_init(&fmeter3);
 
+	acomp_init(&acomp);
+
 	cmds_init();
 
 	/* ─────────────── Main loop ────────────── */
@@ -61,7 +72,9 @@ int main(void)
 	freqmeter_start(&fmeter1);
 	freqmeter_start(&fmeter2);
 	freqmeter_start(&fmeter3);
-	
+
+	acomp_enable(&acomp);
+
 	while(1) {
 		do {
 			msg = uart_msg_pop();
